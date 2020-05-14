@@ -25,7 +25,7 @@ namespace StickHeroGame.StickHero
             Rectangle startPlatform = new Rectangle();
             startPlatform.Size = _sizePoint;
             startPlatform.Location = PositionPoint;
-            e.Graphics.DrawRectangle(Pens.Black, startPlatform);
+            e.Graphics.FillRectangle(Brushes.Black, startPlatform);
             _isExist = true;
         }
 
