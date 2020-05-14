@@ -26,8 +26,11 @@ namespace StickHeroGame
         private int currentStickSize = 0;
         private int destinationToNextPlatform = 0;
         private int currentStickAngle = 180;
-        private int stickStartPointX = 0;
         private bool stickDropped = false;
+        private bool platformExist = false;
+
+        Platform nextPlatform = new Platform(new Point(0,0),new Size(0,0));
+
         Point stickStartPoint = new Point();
         private Rectangle stickRectangle = new Rectangle(0,0,5,0);
 
@@ -80,14 +83,22 @@ namespace StickHeroGame
 
         void DrawNextPlatform(PaintEventArgs e)
         {
-            Random random = new Random();
-            int randomX = random.Next(squareSize * platformSize + 2, squareSize * squareCount);
+            if (!nextPlatform.IsExist())
+            {
+                Random random = new Random();
+                int randomX = random.Next(squareSize * platformSize + 2, squareSize * squareCount);
                 int randomPlatformSize = random.Next(1, 5);
 
-                Rectangle nextPlatform = new Rectangle();
-            nextPlatform.Size = new Size(squareSize * randomPlatformSize, squareSize * platformSize);
-            nextPlatform.Location = new Point(randomX, (squareCount * squareSize) - squareSize * platformSize - 1);
-            e.Graphics.DrawRectangle(Pens.Black, nextPlatform);
+                Point newPosition = new Point(randomX, (squareCount * squareSize) - squareSize * platformSize - 1);
+                Size newSize = new Size(squareSize * randomPlatformSize, squareSize * platformSize);
+
+                nextPlatform.SetNewData(newPosition, newSize);
+                nextPlatform.Draw(e);
+            }
+            else
+            {
+                nextPlatform.Draw(e);
+            }
         }
 
         void SetStickStartPoint(PaintEventArgs e)
@@ -114,25 +125,8 @@ namespace StickHeroGame
             DrawHeroOnPlatform(e);
             if(StickTimer.Enabled)
                 DrawStick(e);
-            //else
-            //{
-            //    StickDrop(e);
-            //}
-            // DrawNextPlatform(e);
-        }
-
-        void StickDrop(PaintEventArgs e)
-        {
-           // stickDropped = true;
-           stickRectangle.Size = new Size(5, currentStickSize);
-
-                    PointF[] stickPoints = RotateStick(stickRectangle, 270);
-
-                e.Graphics.DrawPolygon(Pens.Red, stickPoints);
-                StickHeroField.Refresh();
-
-
-
+            if(!platformExist)
+             DrawNextPlatform(e);
         }
 
         PointF[] RotateStick(Rectangle stick,int angle)
@@ -161,8 +155,6 @@ namespace StickHeroGame
                 case Keys.Space:
                     stickEvent += DrawStick;
                         StickTimer.Start();
-                   
-
                     break;
             }
         }
@@ -176,8 +168,8 @@ namespace StickHeroGame
                     StickHeroField.Refresh();
                     StickDropTimer.Interval = 1;
                     StickDropTimer.Start();
-                    destinationToNextPlatform = GetDestination(stickStartPointX, randomX);
-                    stickHeroGame.CheckStickSize(currentStickSize, destinationToNextPlatform);
+                    destinationToNextPlatform = GetDestination(stickStartPoint.X, nextPlatform.positionPoint.X);
+                    stickHeroGame.CheckStickSize(currentStickSize, destinationToNextPlatform,nextPlatform.GetHeight());
 
                     break;
             }

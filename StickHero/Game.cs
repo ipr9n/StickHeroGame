@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace StickHeroGame.StickHero
 {
@@ -19,9 +20,12 @@ namespace StickHeroGame.StickHero
             return myImageBitmap;
         }
 
-        public void CheckStickSize(int currentSize,int destinationMin)
+        public void CheckStickSize(int currentSize,int destinationMin,int platformHeight)
         {
-
+            if(currentSize<destinationMin)
+                MessageBox.Show($"Не докинул");
+            if (currentSize > destinationMin + platformHeight)
+                MessageBox.Show("Перекинул");
         }
     }
 }
