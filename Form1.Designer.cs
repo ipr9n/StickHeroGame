@@ -31,6 +31,7 @@
             this.components = new System.ComponentModel.Container();
             this.StickHeroField = new System.Windows.Forms.PictureBox();
             this.StickTimer = new System.Windows.Forms.Timer(this.components);
+            this.StickDropTimer = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.StickHeroField)).BeginInit();
             this.SuspendLayout();
             // 
@@ -46,6 +47,10 @@
             // StickTimer
             // 
             this.StickTimer.Tick += new System.EventHandler(this.StickTimer_Tick);
+            // 
+            // StickDropTimer
+            // 
+            this.StickDropTimer.Tick += new System.EventHandler(this.StickDropTimer_Tick);
             // 
             // Form1
             // 
@@ -66,6 +71,7 @@
 
         private System.Windows.Forms.PictureBox StickHeroField;
         private System.Windows.Forms.Timer StickTimer;
+        private System.Windows.Forms.Timer StickDropTimer;
     }
 }
 

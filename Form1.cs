@@ -7,6 +7,7 @@ using System.Drawing.Configuration;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using StickHeroGame.StickHero;
@@ -24,16 +25,23 @@ namespace StickHeroGame
         private int startStickSize = 0;
         private int currentStickSize = 0;
         private int destinationToNextPlatform = 0;
+        private int currentStickAngle = 180;
         private int stickStartPointX = 0;
+        private bool stickDropped = false;
         Point stickStartPoint = new Point();
+        private Rectangle stickRectangle = new Rectangle(0,0,5,0);
 
         int randomX;
         int randomPlatformSize;
+
+        delegate void eventDelegate(PaintEventArgs eventArgs);
+        private event eventDelegate stickEvent;
 
         public Form1()
         {
             InitializeComponent();
             SetWindowSize();
+            StickTimer.Interval = 1;
             heroModel = stickHeroGame.GetHeroModel(heroSize * squareSize);
         }
 
@@ -86,14 +94,16 @@ namespace StickHeroGame
         {
             stickStartPoint = new Point(squareSize * platformSize + 1,
                 (squareCount * squareSize) - squareSize * platformSize - 1);
+            stickRectangle.Location = stickStartPoint;
         }
 
         void DrawStick(PaintEventArgs e)
         {
-            Rectangle stickRectangle = new Rectangle();
-            stickRectangle.Location = stickStartPoint;
-            stickRectangle.Size = new Size(5,currentStickSize*squareSize);
-            e.Graphics.DrawRectangle(Pens.Red, stickRectangle);
+            stickRectangle.Size = new Size(5, currentStickSize);
+
+            PointF[] stickPoints = RotateStick(stickRectangle, 180);
+
+                e.Graphics.DrawPolygon(Pens.Red, stickPoints);
         }
 
         private void StickHeroField_Paint(object sender, PaintEventArgs e)
@@ -102,37 +112,106 @@ namespace StickHeroGame
             SetStickStartPoint(e);
             DrawStartPosition(e);
             DrawHeroOnPlatform(e);
-            DrawStick(e);
-            DrawNextPlatform(e);
+            if(StickTimer.Enabled)
+                DrawStick(e);
+            //else
+            //{
+            //    StickDrop(e);
+            //}
+            // DrawNextPlatform(e);
+        }
+
+        void StickDrop(PaintEventArgs e)
+        {
+           // stickDropped = true;
+           stickRectangle.Size = new Size(5, currentStickSize);
+
+                    PointF[] stickPoints = RotateStick(stickRectangle, 270);
+
+                e.Graphics.DrawPolygon(Pens.Red, stickPoints);
+                StickHeroField.Refresh();
+
+
+
+        }
+
+        PointF[] RotateStick(Rectangle stick,int angle)
+        {
+            //currentStickSize += squareSize; 
+            Matrix M = new Matrix();
+
+            // create an array of all corner points:
+            var p = new PointF[] {
+                stick.Location,
+                new PointF(stick.Right, stick.Top),
+                new PointF(stick.Right, stick.Bottom),
+                new PointF(stick.Left, stick.Bottom) };
+
+
+            M.RotateAt(angle, new PointF(stick.X+2, stick.Y));
+            M.TransformPoints(p);
+
+            return p;
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            //switch (e.KeyCode)
-            //{
-            //    case Keys.Space:
-            //        StickTimer.Start();
-            //        break;
-            //}
+            switch (e.KeyCode)
+            {
+                case Keys.Space:
+                    stickEvent += DrawStick;
+                        StickTimer.Start();
+                   
+
+                    break;
+            }
         }
 
         private void Form1_KeyUp(object sender, KeyEventArgs e)
         {
-            //switch (e.KeyCode)
-            //{
-            //    case Keys.Space:
-            //        StickTimer.Stop();
-            //        destinationToNextPlatform = GetDestination(stickStartPointX, randomX);
-            //        stickHeroGame.CheckStickSize(currentStickSize,destinationToNextPlatform);
-                    
-            //        break;
-            //}
+            switch (e.KeyCode)
+            {
+                case Keys.Space:
+                    StickTimer.Stop();
+                    StickHeroField.Refresh();
+                    StickDropTimer.Interval = 1;
+                    StickDropTimer.Start();
+                    destinationToNextPlatform = GetDestination(stickStartPointX, randomX);
+                    stickHeroGame.CheckStickSize(currentStickSize, destinationToNextPlatform);
+
+                    break;
+            }
         }
 
         private void StickTimer_Tick(object sender, EventArgs e)
         {
-            currentStickSize += squareSize;
+            currentStickSize += 1;
             StickHeroField.Refresh();
+        }
+
+        private void StickDropTimer_Tick(object sender, EventArgs e)
+        {
+            stickRectangle.Size = new Size(5, currentStickSize);
+
+            currentStickAngle++;
+            if (currentStickAngle < 270)
+            {
+                PointF[] stickPoints = RotateStick(stickRectangle, currentStickAngle);
+
+                using (Graphics g = StickHeroField.CreateGraphics())
+                    g.DrawPolygon(Pens.Red, stickPoints);
+                StickHeroField.Refresh();
+            }
+            else
+            {
+                PointF[] stickPoints = RotateStick(stickRectangle, currentStickAngle);
+
+                using (Graphics g = StickHeroField.CreateGraphics())
+                    g.DrawPolygon(Pens.Red, stickPoints);
+
+                currentStickAngle = 180;
+                StickDropTimer.Stop();
+            }
         }
     }
 }
