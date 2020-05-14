@@ -1,0 +1,9 @@
+C:\Users\ipr9n\source\repos\StickHeroGame\StickHeroGame\bin\Debug\StickHeroGame.exe.config
+C:\Users\ipr9n\source\repos\StickHeroGame\StickHeroGame\bin\Debug\StickHeroGame.exe
+C:\Users\ipr9n\source\repos\StickHeroGame\StickHeroGame\bin\Debug\StickHeroGame.pdb
+C:\Users\ipr9n\source\repos\StickHeroGame\StickHeroGame\obj\Debug\StickHeroGame.csprojAssemblyReference.cache
+C:\Users\ipr9n\source\repos\StickHeroGame\StickHeroGame\obj\Debug\StickHeroGame.Form1.resources
+C:\Users\ipr9n\source\repos\StickHeroGame\StickHeroGame\obj\Debug\StickHeroGame.Properties.Resources.resources
+C:\Users\ipr9n\source\repos\StickHeroGame\StickHeroGame\obj\Debug\StickHeroGame.csproj.GenerateResource.cache
+C:\Users\ipr9n\source\repos\StickHeroGame\StickHeroGame\obj\Debug\StickHeroGame.exe
+C:\Users\ipr9n\source\repos\StickHeroGame\StickHeroGame\obj\Debug\StickHeroGame.pdb
