@@ -16,43 +16,36 @@ namespace StickHeroGame
 {
     public partial class Form1 : Form
     {
-        private Image heroModel;
-        Game stickHeroGame = new Game();
-        private int squareSize = 20;
-        private int squareCount = 40;
-        private int platformSize = 5;
-        private int heroSize = 3;
-        private int startStickSize = 0;
-        private int currentStickSize = 0;
-        private int destinationToNextPlatform = 0;
-        private int currentStickAngle = 180;
-        private bool stickDropped = false;
-        private bool platformExist = false;
+        readonly Game _stickHeroGame = new Game();
+        private readonly int _squareSize = 20;
+        private readonly int _squareCount = 40;
+        private readonly int _heroSize = 3;
+        private int _currentStickSize = 0;
+        private int _currentStickAngle = 180;
 
-        Platform nextPlatform = new Platform(new Point(0,0),new Size(0,0));
+        Platform _nextPlatform = new Platform(new Point(0, 0), new Size(0, 0));
+        private Platform _startPlatform;
+        private readonly Hero hero;
 
-        Point stickStartPoint = new Point();
-        private Rectangle stickRectangle = new Rectangle(0,0,5,0);
+        Point _stickStartPoint = new Point();
+        private Rectangle _stickRectangle = new Rectangle(0, 0, 5, 0);
 
-        int randomX;
-        int randomPlatformSize;
-
-        delegate void eventDelegate(PaintEventArgs eventArgs);
-        private event eventDelegate stickEvent;
 
         public Form1()
         {
             InitializeComponent();
             SetWindowSize();
             StickTimer.Interval = 1;
-            heroModel = stickHeroGame.GetHeroModel(heroSize * squareSize);
+            StickDropTimer.Interval = 1;
+            Image heroModel = _stickHeroGame.GetHeroModel(_heroSize * _squareSize);
+            hero = new Hero(heroModel);
         }
 
         void SetWindowSize()
         {
             StickHeroField.Location = new Point(0, 0);
-            StickHeroField.Size = new Size(squareSize*squareCount, squareSize*squareCount);
-            this.Size = new Size(squareSize*squareCount+100, squareSize*squareCount+100);
+            StickHeroField.Size = new Size(_squareSize * _squareCount, _squareSize * _squareCount);
+            this.Size = new Size(_squareSize * _squareCount + 100, _squareSize * _squareCount + 100);
         }
 
         void SetBackgroundColor(PaintEventArgs e)
@@ -65,56 +58,59 @@ namespace StickHeroGame
 
         void DrawStartPosition(PaintEventArgs e)
         {
-            Rectangle startPlatform = new Rectangle();
-            startPlatform.Size = new Size(squareSize*platformSize,squareSize*platformSize);
-            startPlatform.Location = new Point(0,(squareCount*squareSize)-squareSize*platformSize-1);
-            e.Graphics.DrawRectangle(Pens.Black,startPlatform);
+            Size newSize = new Size(_squareSize * _stickHeroGame.PlatformSize, _squareSize * _stickHeroGame.PlatformSize);
+            Point location = new Point(0, (_squareCount * _squareSize) - _squareSize * _stickHeroGame.PlatformSize - 1);
+
+            _startPlatform = new Platform(location, newSize);
+            _startPlatform.Draw(e);
         }
 
         int GetDestination(int start, int finish)
         {
-            return finish-start;
+            return finish - start;
         }
 
         void DrawHeroOnPlatform(PaintEventArgs e)
         {
-            e.Graphics.DrawImage(heroModel, new Point(squareSize * platformSize-heroModel.Width, (squareCount * squareSize) - squareSize * platformSize - heroModel.Height-1));
+            Point location = new Point(_squareSize * _stickHeroGame.PlatformSize - hero.HeroModel.Width,
+                (_squareCount * _squareSize) - _squareSize * _stickHeroGame.PlatformSize - hero.HeroModel.Height - 1);
+            hero.Draw(e, location);
         }
 
         void DrawNextPlatform(PaintEventArgs e)
         {
-            if (!nextPlatform.IsExist())
+            if (!_nextPlatform.IsExist())
             {
                 Random random = new Random();
-                int randomX = random.Next(squareSize * platformSize + 2, squareSize * squareCount);
+                int randomX = random.Next(_squareSize * _stickHeroGame.PlatformSize + 2, _squareSize * _squareCount);
                 int randomPlatformSize = random.Next(1, 5);
 
-                Point newPosition = new Point(randomX, (squareCount * squareSize) - squareSize * platformSize - 1);
-                Size newSize = new Size(squareSize * randomPlatformSize, squareSize * platformSize);
+                Point newPosition = new Point(randomX, (_squareCount * _squareSize) - _squareSize * _stickHeroGame.PlatformSize - 1);
+                Size newSize = new Size(_squareSize * randomPlatformSize, _squareSize * _stickHeroGame.PlatformSize);
 
-                nextPlatform.SetNewData(newPosition, newSize);
-                nextPlatform.Draw(e);
+                _nextPlatform.SetNewData(newPosition, newSize);
+                _nextPlatform.Draw(e);
             }
             else
             {
-                nextPlatform.Draw(e);
+                _nextPlatform.Draw(e);
             }
         }
 
         void SetStickStartPoint(PaintEventArgs e)
         {
-            stickStartPoint = new Point(squareSize * platformSize + 1,
-                (squareCount * squareSize) - squareSize * platformSize - 1);
-            stickRectangle.Location = stickStartPoint;
+            _stickStartPoint = new Point(_squareSize * _stickHeroGame.PlatformSize + 1,
+                (_squareCount * _squareSize) - _squareSize * _stickHeroGame.PlatformSize - 1);
+            _stickRectangle.Location = _stickStartPoint;
         }
 
         void DrawStick(PaintEventArgs e)
         {
-            stickRectangle.Size = new Size(5, currentStickSize);
+            _stickRectangle.Size = new Size(5, _currentStickSize);
 
-            PointF[] stickPoints = RotateStick(stickRectangle, 180);
+            PointF[] stickPoints = RotateStick(_stickRectangle, 180);
 
-                e.Graphics.DrawPolygon(Pens.Red, stickPoints);
+            e.Graphics.DrawPolygon(Pens.Red, stickPoints);
         }
 
         private void StickHeroField_Paint(object sender, PaintEventArgs e)
@@ -123,15 +119,13 @@ namespace StickHeroGame
             SetStickStartPoint(e);
             DrawStartPosition(e);
             DrawHeroOnPlatform(e);
-            if(StickTimer.Enabled)
+            if (StickTimer.Enabled)
                 DrawStick(e);
-            if(!platformExist)
-             DrawNextPlatform(e);
+            DrawNextPlatform(e);
         }
 
-        PointF[] RotateStick(Rectangle stick,int angle)
+        PointF[] RotateStick(Rectangle stick, int angle)
         {
-            //currentStickSize += squareSize; 
             Matrix M = new Matrix();
 
             // create an array of all corner points:
@@ -142,7 +136,7 @@ namespace StickHeroGame
                 new PointF(stick.Left, stick.Bottom) };
 
 
-            M.RotateAt(angle, new PointF(stick.X+2, stick.Y));
+            M.RotateAt(angle, new PointF(stick.X + 2, stick.Y));
             M.TransformPoints(p);
 
             return p;
@@ -153,8 +147,7 @@ namespace StickHeroGame
             switch (e.KeyCode)
             {
                 case Keys.Space:
-                    stickEvent += DrawStick;
-                        StickTimer.Start();
+                    StickTimer.Start();
                     break;
             }
         }
@@ -164,12 +157,12 @@ namespace StickHeroGame
             switch (e.KeyCode)
             {
                 case Keys.Space:
+                    int destinationToNextPlatform;
                     StickTimer.Stop();
                     StickHeroField.Refresh();
-                    StickDropTimer.Interval = 1;
                     StickDropTimer.Start();
-                    destinationToNextPlatform = GetDestination(stickStartPoint.X, nextPlatform.positionPoint.X);
-                    stickHeroGame.CheckStickSize(currentStickSize, destinationToNextPlatform,nextPlatform.GetHeight());
+                    destinationToNextPlatform = GetDestination(_stickStartPoint.X, _nextPlatform.PositionPoint.X);
+                    _stickHeroGame.CheckStickSize(_currentStickSize, destinationToNextPlatform, _nextPlatform.GetWidth());
 
                     break;
             }
@@ -177,18 +170,18 @@ namespace StickHeroGame
 
         private void StickTimer_Tick(object sender, EventArgs e)
         {
-            currentStickSize += 1;
+            _currentStickSize += 1;
             StickHeroField.Refresh();
         }
 
         private void StickDropTimer_Tick(object sender, EventArgs e)
         {
-            stickRectangle.Size = new Size(5, currentStickSize);
+            _stickRectangle.Size = new Size(5, _currentStickSize);
 
-            currentStickAngle++;
-            if (currentStickAngle < 270)
+            _currentStickAngle++;
+            if (_currentStickAngle < 270)
             {
-                PointF[] stickPoints = RotateStick(stickRectangle, currentStickAngle);
+                PointF[] stickPoints = RotateStick(_stickRectangle, _currentStickAngle);
 
                 using (Graphics g = StickHeroField.CreateGraphics())
                     g.DrawPolygon(Pens.Red, stickPoints);
@@ -196,12 +189,12 @@ namespace StickHeroGame
             }
             else
             {
-                PointF[] stickPoints = RotateStick(stickRectangle, currentStickAngle);
+                PointF[] stickPoints = RotateStick(_stickRectangle, _currentStickAngle);
 
                 using (Graphics g = StickHeroField.CreateGraphics())
                     g.DrawPolygon(Pens.Red, stickPoints);
 
-                currentStickAngle = 180;
+                _currentStickAngle = 180;
                 StickDropTimer.Stop();
             }
         }

@@ -1,30 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 namespace StickHeroGame.StickHero
 {
     class Game
     {
-        private string pathToModel = "Hero.png";
+        private readonly string _pathToModel = "Hero.png";
+        public int PlatformSize {get;}
+
+        public Game()
+        {
+            PlatformSize = 5;
+        }
 
         public Image GetHeroModel(int size)
         {
-            Image image = Image.FromFile(pathToModel);
+            Image image = Image.FromFile(_pathToModel);
             Bitmap myImageBitmap = new Bitmap(image,size,size);
 
             return myImageBitmap;
         }
 
-        public void CheckStickSize(int currentSize,int destinationMin,int platformHeight)
+        public void CheckStickSize(int currentSize,int destinationMin,int platformWidth)
         {
             if(currentSize<destinationMin)
                 MessageBox.Show($"Не докинул");
-            if (currentSize > destinationMin + platformHeight)
+
+            if (currentSize > destinationMin + platformWidth)
                 MessageBox.Show("Перекинул");
         }
     }

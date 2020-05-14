@@ -1,56 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 namespace StickHeroGame.StickHero
 {
     class Platform
     {
-        public Point positionPoint;
-        private Size sizePoint;
-        private bool isExist = false;
+        public Point PositionPoint;
+        private Size _sizePoint;
+        private bool _isExist = false;
 
         public Platform(Point position, Size size)
         {
-            positionPoint = position;
-            sizePoint = size;
+            PositionPoint = position;
+            _sizePoint = size;
         }
 
-       public int GetHeight()
+       public int GetWidth()
         {
-            return sizePoint.Width;
+            return _sizePoint.Width;
         }
 
         public void Draw(PaintEventArgs e)
         {
             Rectangle startPlatform = new Rectangle();
-            startPlatform.Size = sizePoint;
-            startPlatform.Location = positionPoint;
+            startPlatform.Size = _sizePoint;
+            startPlatform.Location = PositionPoint;
             e.Graphics.DrawRectangle(Pens.Black, startPlatform);
-            isExist = true;
-
-
-
+            _isExist = true;
         }
 
         public void Reset()
         {
-            isExist = false;
+            _isExist = false;
         }
 
         public void SetNewData(Point position, Size size)
         {
-            positionPoint = position;
-            sizePoint = size;
+            PositionPoint = position;
+            _sizePoint = size;
         }
 
         public bool IsExist()
         {
-            return isExist;
+            return _isExist;
         }
     }
 }
